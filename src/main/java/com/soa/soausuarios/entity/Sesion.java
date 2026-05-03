@@ -2,32 +2,26 @@ package com.soa.soausuarios.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "sesiones", schema = "usuarios_db")
+@Table(name = "sesiones", schema = "usuarios")
 public class Sesion {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
     
-    @Column(name = "jwt_id", length = 64)
+    @Column(name = "jwt_id")
     private String jwtId;
     
-    @Column(name = "ip_address", length = 45)
+    @Column(name = "ip_address")
     private String ipAddress;
     
     @Column(name = "ultima_actividad")

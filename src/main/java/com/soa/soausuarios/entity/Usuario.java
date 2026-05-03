@@ -1,22 +1,16 @@
 package com.soa.soausuarios.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "usuarios", schema = "usuarios_db")
+@Table(name = "usuarios", schema = "usuarios")
 public class Usuario {
-      
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -24,20 +18,20 @@ public class Usuario {
     @Column(unique = true, nullable = false, length = 50)
     private String username;
     
-    @Column(name = "password_hash", nullable = false, length = 255)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
     
-    @Column(name = "nombre_completo", nullable = false, length = 100)
+    @Column(name = "nombre_completo", nullable = false)
     private String nombreCompleto;
     
     @Column(length = 100)
     private String email;
     
     @Column(nullable = false, length = 20)
-    private String rol; // ADMIN, GERENTE, CAJERO, COCINERO, MESERO, DELIVERY
+    private String rol;
     
     @Column(length = 20)
-    private String estado; // ACTIVO, INACTIVO, BLOQUEADO
+    private String estado;
     
     @Column(name = "ultimo_acceso")
     private LocalDateTime ultimoAcceso;
