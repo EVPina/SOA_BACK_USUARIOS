@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "usuarios", schema = "usuarios")
+@Table(name = "usuarios", schema = "public")
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -40,7 +40,7 @@ public class Usuario {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     
-    @UpdateTimestamp
+    @CreationTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }

@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "historial_accesos", schema = "usuarios")
+@Table(name = "historial_accesos", schema = "public")
 public class HistorialAcceso {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -25,8 +25,4 @@ public class HistorialAcceso {
     private String ipAddress;
     
     private String accion;
-    
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
 }

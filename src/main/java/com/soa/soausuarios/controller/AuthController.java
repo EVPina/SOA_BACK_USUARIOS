@@ -2,6 +2,8 @@ package com.soa.soausuarios.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +30,10 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request, httpRequest));
     }
     
-    @PostMapping("/register")
+     @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<UsuarioResponseDTO> register(@Valid @RequestBody UsuarioRequestDTO request) {
-        return ResponseEntity.ok(authService.register(request));
+        UsuarioResponseDTO response = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

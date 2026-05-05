@@ -29,25 +29,24 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
     
-    @Bean
+     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configure(http))
+            .csrf(csrf -> csrf.disable())  // ← DESHABILITAR CSRF para APIs REST
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
+                // ✅ RUTAS PÚBLICAS (sin autenticación)
+                .requestMatchers("/api/auth/**", "/api/auth/register", "/api/auth/login").permitAll()
                 .requestMatchers("/api/usuarios/me").authenticated()
                 .requestMatchers("/api/usuarios/**").hasAnyRole("ADMIN", "GERENTE")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            );
         
         return http.build();
     }
+
     
     @Bean
     public AuthenticationProvider authenticationProvider() {
