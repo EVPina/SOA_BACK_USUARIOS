@@ -1,12 +1,16 @@
 package com.soa.soausuarios.services;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.soa.soausuarios.dto.LoginRequestDTO;
 import com.soa.soausuarios.dto.LoginResponseDTO;
@@ -54,9 +58,14 @@ public class AuthService {
     
     @Transactional
     public LoginResponseDTO login(LoginRequestDTO request, HttpServletRequest httpRequest) {
-        authenticationManager.authenticate(
+                try {
+            authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+            );
+        } catch (BadCredentialsException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas");
+        }
+
         
         Usuario usuario = usuarioRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -90,15 +99,18 @@ public class AuthService {
         sesion.setActiva(true);
         sesionRepository.save(sesion);
         
+     // Generar token y responder...
         return new LoginResponseDTO(token, refreshToken, usuario.getUsername(), usuario.getRol(), usuario.getNombreCompleto());
-    }
+      }
     
     @Transactional
     public UsuarioResponseDTO register(UsuarioRequestDTO request) {
+        // Verificar si usuario ya existe
         if (usuarioRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("El username ya existe");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El username ya existe");
         }
         
+        // Crear usuario
         Usuario usuario = usuarioMapper.toEntity(request);
         usuario.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         usuario.setEstado("ACTIVO");
