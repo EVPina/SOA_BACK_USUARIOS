@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class UsuarioMapper {
     
     public UsuarioResponseDTO toResponseDTO(Usuario usuario) {
+        
         if (usuario == null) return null;
         
         return UsuarioResponseDTO.builder()
