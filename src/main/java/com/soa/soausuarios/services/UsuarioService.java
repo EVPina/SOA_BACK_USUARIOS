@@ -86,4 +86,12 @@ public class UsuarioService {
         usuario.setEstado(estado.toUpperCase());
         usuarioRepository.save(usuario);
     }
+    @Transactional
+    public void cambiarRol(UUID id, String nuevoRol) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+        
+        usuario.setRol(nuevoRol.toUpperCase());
+        usuarioRepository.save(usuario);
+    }
 }

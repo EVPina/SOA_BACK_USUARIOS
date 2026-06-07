@@ -37,7 +37,7 @@ public class SecurityConfig {
                 // ✅ RUTAS PÚBLICAS (sin autenticación)
                 .requestMatchers("/api/auth/**", "/api/auth/register", "/api/auth/login").permitAll()
                 .requestMatchers("/api/usuarios/me").authenticated()
-                .requestMatchers("/api/usuarios/**").hasAnyRole("ADMIN", "GERENTE")
+                .requestMatchers("/api/usuarios/**").permitAll() // ← PERMITIR TODAS LAS RUTAS DE USUARIOS (AJUSTA SEGÚN NECESIDADES)
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

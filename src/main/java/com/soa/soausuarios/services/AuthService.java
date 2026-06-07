@@ -86,9 +86,12 @@ public class AuthService {
         historial.setAccion("LOGIN");
         historialRepository.save(historial);
         
+        
         UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getUsername());
-        String token = jwtService.generateToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails);
+        
+        // ✅ Pasar el rol al generar el token
+        String token = jwtService.generateToken(userDetails, usuario.getRol());
+        String refreshToken = jwtService.generateRefreshToken(userDetails, usuario.getRol());
         
         Sesion sesion = new Sesion();
         sesion.setUsuario(usuario);
