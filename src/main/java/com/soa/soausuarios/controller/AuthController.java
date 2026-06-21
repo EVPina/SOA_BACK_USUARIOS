@@ -14,7 +14,7 @@ import com.soa.soausuarios.dto.UsuarioResponseDTO;
 import com.soa.soausuarios.services.AuthService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
     
