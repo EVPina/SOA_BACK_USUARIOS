@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**", "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
                 .requestMatchers("/api/v1/usuarios/me").authenticated()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/v1/usuarios/**").permitAll() // ← PERMITIR TODAS LAS RUTAS DE USUARIOS (AJUSTA SEGÚN NECESIDADES)
+                .requestMatchers("/api/v1/usuarios/**", "/api/v1/usuarios").permitAll() // ← PERMITIR TODAS LAS RUTAS DE USUARIOS (AJUSTA SEGÚN NECESIDADES)
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
