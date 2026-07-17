@@ -31,29 +31,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        
-        // LOG: Ver qué header llega
-        System.out.println("🔍 Authorization header: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("❌ No hay token o formato incorrecto");
             filterChain.doFilter(request, response);
             return;
         }
 
         final String jwt = authHeader.substring(7);
         final String username = jwtService.extractUsername(jwt);
-        
-        System.out.println("🔍 Username extraído: " + username);
-        System.out.println("🔍 Contexto actual: " + SecurityContextHolder.getContext().getAuthentication());
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            System.out.println("🔍 UserDetails cargado: " + userDetails.getUsername());
-            System.out.println("🔍 Authorities: " + userDetails.getAuthorities());
 
             if (jwtService.validateToken(jwt, userDetails)) {
-                System.out.println("✅ Token válido");
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
@@ -61,9 +51,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                System.out.println("✅ Autenticación establecida");
-            } else {
-                System.out.println("❌ Token inválido");
             }
         }
 
