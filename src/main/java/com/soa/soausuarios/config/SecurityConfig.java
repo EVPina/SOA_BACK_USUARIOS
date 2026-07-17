@@ -1,6 +1,7 @@
 package com.soa.soausuarios.config;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,22 +22,25 @@ import com.soa.soausuarios.services.UsuarioDetailsService;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
+
     private final UsuarioDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    
+
+    @Value("${app.frontend-url:http://localhost:4200}")
+    private String frontendUrl;
+
     public SecurityConfig(UsuarioDetailsService userDetailsService,
                           JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-    
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(List.of("*"));
+                config.setAllowedOrigins(List.of(frontendUrl));
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                 config.setAllowedHeaders(List.of("*"));
                 config.setAllowCredentials(true);
@@ -45,8 +49,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 // Rutas públicas de autenticación
-                .requestMatchers("/api/v1/auth/**", "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
-                // 🔽 PERMITIR SWAGGER Y OPENAPI
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                // Swagger / OpenAPI
                 .requestMatchers(
                     "/swagger-ui.html",
                     "/swagger-ui/**",
@@ -55,10 +59,15 @@ public class SecurityConfig {
                     "/webjars/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // Tus rutas de usuarios (ajusta según necesidad)
-                .requestMatchers("/api/v1/usuarios/me").authenticated()
-                .requestMatchers("/api/v1/usuarios/**", "/api/v1/usuarios").permitAll()
-                // Cualquier otra ruta requiere autenticación
+                .requestMatchers(HttpMethod.GET, "/api/v1/usuarios/me").authenticated()
+                // Lookup público por id: la pantalla de login (QR) necesita mostrar
+                // el mozo asignado a una mesa antes de que el cliente inicie sesión.
+                .requestMatchers(HttpMethod.GET, "/api/v1/usuarios/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/usuarios").hasAnyRole("ADMIN", "RECEPCIONISTA")
+                .requestMatchers(HttpMethod.POST, "/api/v1/usuarios").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/usuarios/{id}/rol").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/usuarios/{id}").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/usuarios/{id}").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
@@ -77,12 +86,12 @@ public class SecurityConfig {
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
-    
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-    
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
