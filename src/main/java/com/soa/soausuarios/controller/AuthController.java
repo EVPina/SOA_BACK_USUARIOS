@@ -20,7 +20,6 @@ import com.soa.soausuarios.services.AuthService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = "${app.frontend-url:http://localhost:4200}")
 @Tag(name = "Autenticación", description = "API para gestionar la autenticación de usuarios")
 public class AuthController {
     
