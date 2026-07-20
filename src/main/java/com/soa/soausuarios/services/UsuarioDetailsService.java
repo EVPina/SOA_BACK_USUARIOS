@@ -26,7 +26,7 @@ public class UsuarioDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + identifier)));
 
         // ✅ Asegurar que el rol tenga el prefijo ROLE_
-        String role = "ROLE_" + usuario.getRol();
+        String role = "ROLE_" + usuario.getRol().getNombre();
 
         return new User(
                 usuario.getUsername(),

@@ -9,9 +9,17 @@ import com.soa.soausuarios.entity.Usuario;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.soa.soausuarios.repository.RolesRepository;
+import com.soa.soausuarios.entity.Roles;
+
 @Component
 public class UsuarioMapper {
     
+    private final RolesRepository rolesRepository;
+
+    public UsuarioMapper(RolesRepository rolesRepository) {
+        this.rolesRepository = rolesRepository;
+    }
     public UsuarioResponseDTO toResponseDTO(Usuario usuario) {
         
         if (usuario == null) return null;
@@ -21,7 +29,7 @@ public class UsuarioMapper {
                 .username(usuario.getUsername())
                 .nombreCompleto(usuario.getNombreCompleto())
                 .email(usuario.getEmail())
-                .rol(usuario.getRol())
+                .rol(usuario.getRol().getNombre())
                 .estado(usuario.getEstado())
                 .ultimoAcceso(usuario.getUltimoAcceso())
                 .createdAt(usuario.getCreatedAt())
@@ -41,7 +49,10 @@ public class UsuarioMapper {
         usuario.setUsername(dto.getUsername());
         usuario.setNombreCompleto(dto.getNombreCompleto());
         usuario.setEmail(dto.getEmail());
-        usuario.setRol(dto.getRol() != null ? dto.getRol().toUpperCase() : "CAJERO");
+        String rolNombre = dto.getRol() != null ? dto.getRol().toUpperCase() : "CAJERO";
+        Roles rol = rolesRepository.findByNombre(rolNombre)
+            .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + rolNombre));
+        usuario.setRol(rol);
         return usuario;
     }
 }
