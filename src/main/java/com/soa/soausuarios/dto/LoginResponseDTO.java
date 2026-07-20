@@ -11,6 +11,8 @@ public class LoginResponseDTO {
     private String token;
     @Schema(description = "Token de refresco", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
     private String refreshToken;
+    @Schema(description = "ID de usuario", example = "a1b2c3d4-...")
+    private String id;
     @Schema(description = "Nombre de usuario", example = "usuario123")
     private String username;
     @Schema(description = "Rol del usuario", example = "ADMIN")

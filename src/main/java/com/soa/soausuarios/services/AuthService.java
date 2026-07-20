@@ -104,7 +104,7 @@ public class AuthService {
         sesionRepository.save(sesion);
         
      // Generar token y responder...
-        return new LoginResponseDTO(token, refreshToken, usuario.getUsername(), usuario.getRol().getNombre(), usuario.getNombreCompleto());
+        return new LoginResponseDTO(token, refreshToken, usuario.getId().toString(), usuario.getUsername(), usuario.getRol().getNombre(), usuario.getNombreCompleto());
       }
     
     @Transactional
