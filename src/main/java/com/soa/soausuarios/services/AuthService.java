@@ -68,7 +68,8 @@ public class AuthService {
 
         
         Usuario usuario = usuarioRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseGet(() -> usuarioRepository.findByEmail(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado")));
         
         if (!"ACTIVO".equals(usuario.getEstado())) {
             throw new RuntimeException("Usuario no está activo");
