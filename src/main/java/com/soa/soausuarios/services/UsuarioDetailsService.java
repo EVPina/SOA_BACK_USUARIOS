@@ -20,12 +20,13 @@ public class UsuarioDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findByUsername(identifier)
+                .orElseGet(() -> usuarioRepository.findByEmail(identifier)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + identifier)));
 
         // ✅ Asegurar que el rol tenga el prefijo ROLE_
-        String role = "ROLE_" + usuario.getRol();
+        String role = "ROLE_" + usuario.getRol().getNombre();
 
         return new User(
                 usuario.getUsername(),

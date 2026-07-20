@@ -13,19 +13,25 @@ import com.soa.soausuarios.repository.UsuarioRepository;
 import java.util.List;
 import java.util.UUID;
 
+import com.soa.soausuarios.repository.RolesRepository;
+import com.soa.soausuarios.entity.Roles;
+
 @Service
 public class UsuarioService {
     
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final UsuarioMapper usuarioMapper;
+    private final RolesRepository rolesRepository;
     
     public UsuarioService(UsuarioRepository usuarioRepository, 
                           PasswordEncoder passwordEncoder,
-                          UsuarioMapper usuarioMapper) {
+                          UsuarioMapper usuarioMapper,
+                          RolesRepository rolesRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.usuarioMapper = usuarioMapper;
+        this.rolesRepository = rolesRepository;
     }
     
     public List<UsuarioResponseDTO> getAllUsuarios() {
@@ -91,7 +97,10 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
         
-        usuario.setRol(nuevoRol.toUpperCase());
+        Roles rol = rolesRepository.findByNombre(nuevoRol.toUpperCase())
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + nuevoRol.toUpperCase()));
+        
+        usuario.setRol(rol);
         usuarioRepository.save(usuario);
     }
 }

@@ -1,7 +1,10 @@
 package com.soa.soausuarios.config;
 
+import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -13,41 +16,62 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.web.cors.CorsConfiguration;
 import com.soa.soausuarios.services.UsuarioDetailsService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
+
     private final UsuarioDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    
+
+    @Value("${app.frontend-url:http://localhost:4200}")
+    private String frontendUrl;
+
     public SecurityConfig(UsuarioDetailsService userDetailsService,
                           JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-    
-     @Bean
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())  // ← DESHABILITAR CSRF para APIs REST
+            .cors(cors -> cors.disable())
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // ✅ RUTAS PÚBLICAS (sin autenticación)
-                .requestMatchers("/api/auth/**", "/api/auth/register", "/api/auth/login").permitAll()
-                .requestMatchers("/api/usuarios/me").authenticated()
-                .requestMatchers("/api/usuarios/**").permitAll() // ← PERMITIR TODAS LAS RUTAS DE USUARIOS (AJUSTA SEGÚN NECESIDADES)
+                // Rutas públicas de autenticación
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                // Swagger / OpenAPI
+                .requestMatchers(
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/swagger-resources/**",
+                    "/webjars/**"
+                ).permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/usuarios/me").authenticated()
+                // Lookup público por id: la pantalla de login (QR) necesita mostrar
+                // el mozo asignado a una mesa antes de que el cliente inicie sesión.
+                .requestMatchers(HttpMethod.GET, "/api/v1/usuarios/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/usuarios").hasAnyRole("ADMIN", "RECEPCIONISTA")
+                .requestMatchers(HttpMethod.POST, "/api/v1/usuarios").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/usuarios/{id}/rol").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/usuarios/{id}").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/usuarios/{id}").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            );
-        
+            )
+            // 🔽 AÑADIR EL FILTRO JWT ANTES DEL FILTRO POR DEFECTO
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
-    
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -55,12 +79,12 @@ public class SecurityConfig {
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
-    
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-    
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

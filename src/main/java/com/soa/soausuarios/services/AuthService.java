@@ -68,7 +68,8 @@ public class AuthService {
 
         
         Usuario usuario = usuarioRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseGet(() -> usuarioRepository.findByEmail(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado")));
         
         if (!"ACTIVO".equals(usuario.getEstado())) {
             throw new RuntimeException("Usuario no está activo");
@@ -90,8 +91,8 @@ public class AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getUsername());
         
         // ✅ Pasar el rol al generar el token
-        String token = jwtService.generateToken(userDetails, usuario.getRol());
-        String refreshToken = jwtService.generateRefreshToken(userDetails, usuario.getRol());
+        String token = jwtService.generateToken(userDetails, usuario.getRol().getNombre());
+        String refreshToken = jwtService.generateRefreshToken(userDetails, usuario.getRol().getNombre());
         
         Sesion sesion = new Sesion();
         sesion.setUsuario(usuario);
@@ -103,7 +104,7 @@ public class AuthService {
         sesionRepository.save(sesion);
         
      // Generar token y responder...
-        return new LoginResponseDTO(token, refreshToken, usuario.getUsername(), usuario.getRol(), usuario.getNombreCompleto());
+        return new LoginResponseDTO(token, refreshToken, usuario.getUsername(), usuario.getRol().getNombre(), usuario.getNombreCompleto());
       }
     
     @Transactional

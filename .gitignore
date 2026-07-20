@@ -33,3 +33,6 @@ build/
 .vscode/
 
 error.log
+# Environment variables
+.env
+.env.*

@@ -31,18 +31,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        
-        // LOG: Ver qué header llega
-        System.out.println("🔍 Authorization header: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("❌ No hay token o formato incorrecto");
             filterChain.doFilter(request, response);
             return;
         }
 
         final String jwt = authHeader.substring(7);
-        
         // Si el token es un UUID de Cliente (no tiene puntos), lo ignoramos 
         // para no lanzar excepciones de JWT mal formado.
         if (!jwt.contains(".")) {

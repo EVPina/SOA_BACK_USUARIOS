@@ -27,8 +27,9 @@ public class Usuario {
     @Column(length = 100)
     private String email;
     
-    @Column(nullable = false, length = 20)
-    private String rol;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rol_id", nullable = false)
+    private Roles rol;
     
     @Column(length = 20)
     private String estado;
